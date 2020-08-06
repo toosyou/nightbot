@@ -12,6 +12,9 @@ flask = "*"
 requests = "*"
 bs4 = "*"
 pyopenssl = "*"
+python-twitch-irc = "*"
+python-twitch-stream = "*"
+twitchio = "*"
 
 [requires]
 python_version = "3.6"

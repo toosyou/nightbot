@@ -1,10 +1,7 @@
-from flask import Flask, request
-
 import re
 import requests
 from bs4 import BeautifulSoup
-
-app = Flask(__name__)
+from flask import request
 
 def get_level_and_name(soup):
     level_and_name = soup.select('#personalfile_refresh > div > h1:nth-child(2) > div')[0].text.strip()
@@ -20,7 +17,6 @@ def get_rank(soup):
 def get_last_update(soup):
     return soup.select('#tabs-personalfile > div.label.label-info.pull-left.personalfile-last-update')[0].text
 
-@app.route("/")
 def parser():
     try:
         summoner_name = request.args.get('id')
@@ -49,6 +45,3 @@ def parser():
             )
     except:
         return '是不是打錯名字了呢 >< 指令用法：!rank [召喚者名稱]'
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=7000)

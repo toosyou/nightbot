@@ -1,0 +1,3 @@
+[submodule "NightPy"]
+	path = NightPy
+	url = git@github.com:toosyou/NightPy.git

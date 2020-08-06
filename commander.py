@@ -1,45 +1,57 @@
 import requests
 from flask import Flask, request
-from NightPy.nightpy import NightPy
 import configparser
+import threading
+
+from twitchio.ext import commands
+
+from token_parser import request_nightbot_token, get_and_save_token
+import states
+import rank_parser
+import songs
+
+import os, sys
+sys.path.append(os.path.join('./', 'NightPy'))
+from NightPy.nightpy import NightPy
 
 app = Flask(__name__)
 
-CONFIG_FILENAME = './config.cfg'
+CONFIG_FILENAME = './paylin.cfg'
 secret_config = configparser.ConfigParser()
 secret_config.read(CONFIG_FILENAME)
 
-TOKEN = None
+chat_bot = commands.Bot(
+    irc_token = secret_config['twitch']['chat_token'],
+    client_id = secret_config['twitch']['client_id'],
+    nick = secret_config['twitch']['nick'],
+    prefix = '!',
+    initial_channels=['#{}'.format(secret_config['general']['channel'])]
+)
 
-@app.route("/")
-def hello():
-    print(request.args)
-    print(request.args.get('code'))
-    return "Hello World!"
+nightbot = NightPy(get_and_save_token(request_nightbot_token))
+nightbot.join_channel()
 
-def request_token():
-    r = requests.post('https://api.nightbot.tv/oauth2/token',
-        data={
-            'client_id': secret_config['secret']['client_id'],
-            'grant_type': secret_config['secret']['grant_type'],
-            'scope': secret_config['secret']['scope'],
-            'client_secret': secret_config['secret']['client_secret'],
-        }
-    )
-    return r.json()['access_token']
+states.initial()
+
+@chat_bot.event
+async def event_message(ctx):
+    'Runs every time a message is sent in chat.'
+
+    # make sure the bot ignores itself and the streamer
+    if ctx.author.name.lower() == 'Nightbot'.lower():
+        return
+
+    if ctx.content.lower().strip() == '+1' or ctx.content.lower().strip() =='＋１':
+        states.global_states.song.skip_vote_upvote(ctx.author.name)
+
+    if ctx.content.lower().strip() == '-1' or ctx.content.lower().strip() =='－１':
+        states.global_states.song.skip_vote_downvote(ctx.author.name)
 
 if __name__ == "__main__":
-    if secret_config.has_option('secret', 'token'):
-        TOKEN = secret_config['secret']['token']
-    else:
-        TOKEN = request_token()
-        secret_config.set('secret', 'token', TOKEN)
-        with open(CONFIG_FILENAME, 'w') as f:
-            secret_config.write(f)
+    t = threading.Thread(target=chat_bot.run)
+    t.start()
 
-    nightbot = NightPy(TOKEN)
-    print(nightbot.get_channel())
-    nightbot.join_channel()
-    nightbot.send_channel_message('testing')
-    # print(TOKEN)
-    # app.run(host='0.0.0.0', port=7001, ssl_context='adhoc')
+    app.add_url_rule('/rank', view_func=rank_parser.parser)
+    app.add_url_rule('/skip', view_func=songs.receive_skip)
+
+    app.run(host='0.0.0.0', port=7001)
