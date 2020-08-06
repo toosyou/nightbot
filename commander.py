@@ -5,14 +5,10 @@ import threading
 
 from twitchio.ext import commands
 
-from token_parser import request_nightbot_token, get_and_save_token
 import states
 import rank_parser
 import songs
-
-import os, sys
-sys.path.append(os.path.join('./', 'NightPy'))
-from NightPy.nightpy import NightPy
+import polls
 
 app = Flask(__name__)
 
@@ -28,10 +24,18 @@ chat_bot = commands.Bot(
     initial_channels=['#{}'.format(secret_config['general']['channel'])]
 )
 
-nightbot = NightPy(get_and_save_token(request_nightbot_token))
-nightbot.join_channel()
-
 states.initial()
+
+def check_vote(comment, user_id):
+    if comment in states.global_states.anchor_option:
+        states.global_states.vote(user_id, comment)
+
+def check_command(comment, user_id):
+    if comment.startswith('!'):
+        command = {
+            '!投票': polls.add_poll
+        }.get(comment.split(' ')[0], None)
+        if command: command(comment, user_id)
 
 @chat_bot.event
 async def event_message(ctx):
@@ -41,11 +45,11 @@ async def event_message(ctx):
     if ctx.author.name.lower() == 'Nightbot'.lower():
         return
 
-    if ctx.content.lower().strip() == '+1' or ctx.content.lower().strip() =='＋１':
-        states.global_states.song.skip_vote_upvote(ctx.author.name)
+    comment = ctx.content
+    user_id = ctx.author.name
 
-    if ctx.content.lower().strip() == '-1' or ctx.content.lower().strip() =='－１':
-        states.global_states.song.skip_vote_downvote(ctx.author.name)
+    check_vote(comment.lower().strip(), user_id)
+    check_command(comment, user_id)
 
 if __name__ == "__main__":
     t = threading.Thread(target=chat_bot.run)

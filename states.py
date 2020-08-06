@@ -1,32 +1,49 @@
 import threading
 
+class GeneralPoll():
+    def __init__(self, name, options, single_vote=True):
+        self.single_vote = single_vote
+
+        self.name = name
+        self.lock = threading.Lock()
+        self.options = dict()
+        self.voted_user = set()
+        self.init(options)
+
+    def init(self, options):
+        self.options = dict()
+        for option in options:
+            self.options[option] = 0
+
+        self.voted_user = set()
+
+    def vote(self, user_id, which):
+        with self.lock:
+            if self.single_vote and user_id not in self.voted_user:
+                self.options[which] += 1
+                self.voted_user.add(user_id)
+
 class States():
-    class Song():
-        def __init__(self):
-            self.poll_lock = threading.Lock()
-            self.skip_poll_up = 0
-            self.skip_poll_down = 0
-            self.voted_user = set()
-
-        def skip_poll_init(self):
-            with self.poll_lock:
-                self.skip_poll_up = self.skip_poll_down = 0
-                self.voted_user = set()
-
-        def skip_vote_upvote(self, user_id):
-            with self.poll_lock:
-                if user_id not in self.voted_user:
-                    self.skip_poll_up += 1
-                    self.voted_user.add(user_id)
-
-        def skip_vote_downvote(self, user_id):
-            with self.poll_lock:
-                if user_id not in self.voted_user:
-                    self.skip_poll_down += 1
-                    self.voted_user.add(user_id)
-        
     def __init__(self):
-        self.song = self.Song()
+        self.polls = dict()
+        self.anchor_option = set()
+
+    def add_poll(self, name, options, single_vote=True):
+        if name not in self.polls:
+            self.polls[name] = GeneralPoll(name, options, single_vote=single_vote)
+        self.reset_anchor()
+
+    def del_poll(self, name):
+        self.polls.pop(name, None)
+
+    def reset_anchor(self):
+        self.anchor_option = set()
+        for name, poll in self.polls.items():
+            self.anchor_option.update(poll.options.keys())
+
+    def vote(self, user_id, which):
+        for name, poll in self.polls.items():
+            poll.vote(user_id, which)
 
 def initial():
     global global_states

@@ -1,6 +1,10 @@
 import requests
 import configparser
 
+import os, sys
+sys.path.append(os.path.join('./', 'NightPy'))
+from NightPy.nightpy import NightPy
+
 CONFIG_FILENAME = './paylin.cfg'
 secret_config = configparser.ConfigParser()
 secret_config.read(CONFIG_FILENAME)
@@ -25,3 +29,6 @@ def get_and_save_token(token_func):
         with open(CONFIG_FILENAME, 'w') as f:
             secret_config.write(f)
     return token
+
+nightbot = NightPy(get_and_save_token(request_nightbot_token))
+nightbot.join_channel()
