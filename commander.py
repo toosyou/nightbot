@@ -5,10 +5,12 @@ import threading
 
 from twitchio.ext import commands
 
+from nightbot import nightbot
 import states
 import rank_parser
 import songs
 import polls
+import lyric
 
 app = Flask(__name__)
 
@@ -31,11 +33,10 @@ def check_vote(comment, user_id):
         states.global_states.vote(user_id, comment)
 
 def check_command(comment, user_id):
-    if comment.startswith('!'):
-        command = {
-            '!投票': polls.add_poll
-        }.get(comment.split(' ')[0], None)
-        if command: command(comment, user_id)
+    command = {
+        '我難過的是': lyric.random_lyrics
+    }.get(comment.split(' ')[0], None)
+    if command: command(comment, user_id)
 
 @chat_bot.event
 async def event_message(ctx):
@@ -57,5 +58,8 @@ if __name__ == "__main__":
 
     app.add_url_rule('/rank', view_func=rank_parser.parser)
     app.add_url_rule('/skip', view_func=songs.receive_skip)
+    app.add_url_rule('/poll', view_func=polls.add_poll)
+    app.add_url_rule('/volumeup', view_func=songs.volumeup)
+    app.add_url_rule('/volumedown', view_func=songs.volumedown)
 
     app.run(host='0.0.0.0', port=7001)

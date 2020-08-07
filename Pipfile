@@ -15,6 +15,7 @@ pyopenssl = "*"
 python-twitch-irc = "*"
 python-twitch-stream = "*"
 twitchio = "*"
+numpy = "*"
 
 [requires]
 python_version = "3.6"
