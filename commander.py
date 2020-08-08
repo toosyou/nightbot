@@ -2,6 +2,7 @@ import requests
 from flask import Flask, request
 import configparser
 import threading
+import better_exceptions; better_exceptions.hook()
 
 from twitchio.ext import commands
 
@@ -34,9 +35,14 @@ def check_vote(comment, user_id):
 
 def check_command(comment, user_id):
     command = {
-        '我難過的是': lyric.random_lyrics
     }.get(comment.split(' ')[0], None)
     if command: command(comment, user_id)
+
+def lyric_match(comment):
+    comment = comment.lower().replace(' ', '')
+    for key in lyric.lyrics:
+        if comment.startswith(key.lower().replace(' ', '')):
+            lyric.random_lyrics(key)
 
 @chat_bot.event
 async def event_message(ctx):
@@ -50,6 +56,7 @@ async def event_message(ctx):
     user_id = ctx.author.name
 
     check_vote(comment.lower().strip(), user_id)
+    lyric_match(comment)
     check_command(comment, user_id)
 
 if __name__ == "__main__":
@@ -57,9 +64,14 @@ if __name__ == "__main__":
     t.start()
 
     app.add_url_rule('/rank', view_func=rank_parser.parser)
-    app.add_url_rule('/skip', view_func=songs.receive_skip)
+    
     app.add_url_rule('/poll', view_func=polls.add_poll)
+
+    # songs
+    app.add_url_rule('/skip', view_func=songs.receive_skip)
+    app.add_url_rule('/add_playlist', view_func=songs.add_playlist)
     app.add_url_rule('/volumeup', view_func=songs.volumeup)
     app.add_url_rule('/volumedown', view_func=songs.volumedown)
+    app.add_url_rule('/add_and_skip', view_func=songs.add_and_skip)
 
     app.run(host='0.0.0.0', port=7001)

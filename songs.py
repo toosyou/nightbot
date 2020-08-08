@@ -23,6 +23,17 @@ def receive_skip():
     threading.Timer(10, skip_poll_result).start()
     return '卡歌投票開始，倒數十秒鐘，我話講完，誰贊成誰反對（同意 +1 不同意 -1）'
 
+def add_and_skip():
+    try:
+        if len(request.args['query'].strip()) == 0:
+            return '用法：!插歌 [搜尋字串 | 歌曲 youtube 連結]'
+        queue = nightbot.add_new_queue_item(request.args['query'])
+        nightbot.promote_queue_item(queue.id)
+        nightbot.skip_current_queue_item()
+        return '歌曲： {} 插播！'.format(queue.track.title)
+    except:
+        return '插播失敗！要求 {} 可能已經在歌單中，或是歌曲太長了喔！'.format(request.args['query'])
+
 def get_volume():
     return nightbot.get_song_request_settings()[5]
 
@@ -31,11 +42,11 @@ def volumeup():
 
     new_volume = min(100, setting.volume + 5)
 
-    nightbot.edit_song_request_settings(
-        providers = setting.providers,
-        search_provider = setting.search_provider,
-        volume = new_volume
-    )
+    payload = {
+        'volume': new_volume
+    }
+
+    nightbot.api_request('song_requests', method='put', payload=payload)
     return '音量已被調為：{}'.format(new_volume)
 
 def volumedown():
@@ -43,9 +54,19 @@ def volumedown():
 
     new_volume = max(0, setting.volume - 5)
 
-    nightbot.edit_song_request_settings(
-        providers = setting.providers,
-        search_provider = setting.search_provider,
-        volume = new_volume
-    )
+    payload = {
+        'volume': new_volume
+    }
+
+    nightbot.api_request('song_requests', method='put', payload=payload)
     return '音量已被調為：{}'.format(new_volume)
+
+def add_playlist():
+    try:
+        if len(request.args['query'].strip()) == 0:
+            return '用法：!加歌 [搜尋字串 | 歌曲 youtube 連結]'
+
+        song = nightbot.add_playlist_item(request.args['query'])
+        return '新歌： {} 已經被永久的加入到播放清單囉'.format(song.track.title)
+    except:
+        return '要求 {} 可能已經在歌單中，或是歌曲太長了喔！'.format(request.args['query'])

@@ -16,6 +16,7 @@ python-twitch-irc = "*"
 python-twitch-stream = "*"
 twitchio = "*"
 numpy = "*"
+better-exceptions = "*"
 
 [requires]
 python_version = "3.6"
