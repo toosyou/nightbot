@@ -17,6 +17,7 @@ python-twitch-stream = "*"
 twitchio = "*"
 numpy = "*"
 better-exceptions = "*"
+lxml = "*"
 
 [requires]
 python_version = "3.6"

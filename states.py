@@ -32,6 +32,7 @@ class States():
     def __init__(self):
         self.polls = dict()
         self.anchor_option = set()
+        self.strikes = dict()
 
     def add_poll(self, name, options, option_desc=None, single_vote=True):
         if name not in self.polls:
