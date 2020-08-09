@@ -11,11 +11,24 @@ import threading
 
 PTT_url = "https://www.ptt.cc"
 
-update_time = None
-image_urls = list()
+class BeautyLinks():
+    def __init__(self, title_rule, n_articles, upvote_threshold):
+        self.urls = list()
+        self.title_rule, self.n_articles = title_rule, n_articles
+        self.upvote_threshold = upvote_threshold
 
-boobs_update_time = None
-boobs_urls = list()
+    def random_get(self):
+        while True:
+            try:
+                return np.random.choice(self.urls)
+            except: time.sleep(5)
+
+    def update(self):
+        new_articles = get_recent_articles(self.title_rule, self.n_articles)
+        self.urls = filter_by_upvotes(new_articles, self.upvote_threshold)
+
+boobs_links = BeautyLinks(r'.*[兇|凶|胸|奶|\b脾氣\b].*', 10, 10)
+beauty_links = BeautyLinks('.*', 50, 10)
 
 def get_webPage(url):
     res = requests.get(url,cookies = {'over18': '1'})
@@ -101,50 +114,17 @@ def filter_by_upvotes(allArticles, threshold=10):
                     for imgLink in imgLinks:
                         images.append(imgLink['href'])
                 except Exception as e:
-                    print(e)
                     pass
     return images
 
-def get_random_image_url(boobs_only=False):
-    global update_time
-    global image_urls
-    global boobs_update_time
-    global boobs_urls
+def get_beauty():
+    return '隨機表特：{}'.format(beauty_links.random_get())
 
-    now = time.time()
-
-    if boobs_only:
-        if boobs_update_time is not None and now - boobs_update_time < 60*60:
-            return '隨機奶特：{}'.format(np.random.choice(boobs_urls))
-        boobs_urls = list()
-
-        boobs_urls = filter_by_upvotes(get_recent_articles(r'.*[兇|凶|胸|奶|\b脾氣\b].*', 10), 10)
-        boobs_update_time = time.time()
-        print('boobs updated!')
-        return '隨機奶特：{}'.format(np.random.choice(boobs_urls))
-    else:
-        if update_time is not None and now - update_time < 60*30:
-            return '隨機表特：{}'.format(np.random.choice(image_urls))
-
-        image_urls = list()
-
-        image_urls = filter_by_upvotes(get_recent_articles(n_articles=50), 10)
-        update_time = time.time()
-        print('beauty updated!')
-        return '隨機表特：{}'.format(np.random.choice(image_urls))
-
-def get_random_boobs():
-    return get_random_image_url(True)
-
-def initial_parser():
-    get_random_boobs()
-    get_random_image_url()
+def get_boobs():
+    return '隨機奶特：{}'.format(boobs_links.random_get())
 
 def timer_parser():
-    threading.Thread(target=initial_parser).start()
+    threading.Thread(target=beauty_links.update).start()
+    threading.Thread(target=boobs_links.update).start()
     threading.Timer(60*30, timer_parser).start()
 timer_parser()
-
-if __name__ == '__main__':
-    print(get_random_image_url(True))
-    print(get_random_image_url(True))

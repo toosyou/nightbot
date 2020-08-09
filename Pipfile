@@ -18,6 +18,7 @@ twitchio = "*"
 numpy = "*"
 better-exceptions = "*"
 lxml = "*"
+gtts = "*"
 
 [requires]
 python_version = "3.6"

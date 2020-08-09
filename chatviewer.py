@@ -2,8 +2,10 @@ from twitchio.ext import commands
 import configparser
 import re
 import json
+import time
 import requests
 import threading
+import numpy as np
 
 from nightbot import nightbot
 import strike
@@ -51,6 +53,21 @@ def lyric_match(comment):
         if comment.startswith(key.lower().replace(' ', '')):
             lyric.random_lyrics(key)
 
+def redemption(title, user_id, user_input):
+    title_and_funcs = {
+        '隨機表特': lambda user_id, user_input: '@{} 恭喜獲得{}'.format(user_id, beauty.get_beauty()),
+        '隨機奶特': lambda user_id, user_input: '小色鬼 @{} 恭喜獲得{}'.format(user_id, beauty.get_boobs()),
+        '全服廣播': lambda user_id, user_input: '!speak {} 說 {}'.format(user_id, user_input),
+    }
+
+    if title in title_and_funcs:
+        message = title_and_funcs[title](user_id, user_input)
+        while True:
+            if nightbot.send_channel_message(message) is None:
+                time.sleep(1 + np.random.rand()*2)
+            else:
+                return
+
 class Bot(commands.Bot):
     async def event_ready(self):
         await self.pubsub_subscribe(secret_config['twitch']['oauth_token'], 
@@ -64,13 +81,15 @@ class Bot(commands.Bot):
             payload = json.loads(payload)
             #now the payload is a dictionary, but it's nested as hell, so getting to the name of the reward is clunky
 
-            user_id = payload['data']['redemption']['user']['login']
+            user_id = payload['data']['redemption']['user']['display_name']
             title = payload['data']['redemption']['reward']['title']
 
-            if title == '隨機表特':
-                nightbot.send_channel_message('@{} 恭喜獲得{}'.format(user_id, beauty.get_random_image_url()))
-            if title == '隨機奶特':
-                nightbot.send_channel_message('小色鬼 @{} 恭喜獲得{}'.format(user_id, beauty.get_random_boobs()))
+            try:
+                user_input = payload['data']['redemption']['user_input']
+            except:
+                user_input = ''
+
+            redemption(title, user_id, user_input)
 
     async def event_message(self, ctx):
         # make sure the bot ignores itself and the streamer

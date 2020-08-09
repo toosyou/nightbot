@@ -25,7 +25,7 @@ if __name__ == "__main__":
     app.add_url_rule('/volumeup', view_func=songs.volumeup)
     app.add_url_rule('/volumedown', view_func=songs.volumedown)
     app.add_url_rule('/add_and_skip', view_func=songs.add_and_skip)
-    app.add_url_rule('/random_beauty', view_func=beauty.get_random_image_url)
-    app.add_url_rule('/boobs', view_func=beauty.get_random_boobs)
+    app.add_url_rule('/beauty', view_func=beauty.get_beauty)
+    app.add_url_rule('/boobs', view_func=beauty.get_boobs)
 
     app.run(host='0.0.0.0', port=7001)

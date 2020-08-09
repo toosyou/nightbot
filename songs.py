@@ -63,10 +63,12 @@ def volumedown():
 
 def add_playlist():
     try:
-        if len(request.args['query'].strip()) == 0:
-            return '用法：!加歌 [搜尋字串 | 歌曲 youtube 連結]'
+        query = request.args['query'].strip()
+        if len(query) == 0:
+            query = nightbot.get_current_song().track.url
 
-        song = nightbot.add_playlist_item(request.args['query'])
+        song = nightbot.add_playlist_item(query)
         return '新歌： {} 已經被永久的加入到播放清單囉'.format(song.track.title)
+
     except:
-        return '要求 {} 可能已經在歌單中，或是歌曲太長了喔！'.format(request.args['query'])
+        return '要求 {} 可能已經在歌單中，或是歌曲太長了喔！'.format(query)
