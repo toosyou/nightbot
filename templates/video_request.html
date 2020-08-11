@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>WebSockets Example</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+       $(document).ready(function(){
+
+           var socket = io.connect('http://' + document.domain + ':' + location.port);
+           var playing = false;
+
+           //socket.on('connect', function() {
+           //    socket.emit('am up', {data: 'I\'m connected!'});
+           //});
+
+           //listens to 'price update' message on socket
+           socket.on('new video', function(msg) {
+                // $('#video').src = msg + '?start=10&rel=0&autoplay=1'
+                if(playing){
+                    return;
+                }
+                
+                playing = true;
+                document.getElementById('video').src = `${msg.url}?start=${msg.start_time}&rel=0&autoplay=1`;
+
+                socket.emit('successful')
+
+                setTimeout(function(){
+                    document.getElementById('video').src = '';
+                    playing = false;
+                    socket.emit('next');
+                }, (msg.duration+3)*1000);
+                console.log(msg)
+           });
+       });
+
+       $(function(){
+            $('#video').css({ width: $(window).innerWidth() + 'px', height: $(window).innerHeight() + 'px' });
+
+            // If you want to keep full screen on window resize
+            $(window).resize(function(){
+                $('#video').css({ width: $(window).innerWidth() + 'px', height: $(window).innerHeight() + 'px' });
+            });
+        });
+   </script>
+   <style>
+       body {
+            overflow-y: hidden; /* Hide vertical scrollbar */
+            overflow-x: hidden; /* Hide horizontal scrollbar */
+        }
+   </style>
+</head>
+<body>
+    <iframe id='video' width="560" height="315" 
+    src=""
+    frameborder="0" 
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
+    allowfullscreen></iframe>
+</body>
+</html>

@@ -1,7 +1,7 @@
-import requests
-from flask import Flask, request
-import threading
+
 import better_exceptions; better_exceptions.hook()
+
+from app_socket import app, socketio
 
 from nightbot import nightbot
 import chatviewer
@@ -10,8 +10,7 @@ import rank_parser
 import songs
 import polls
 import beauty
-
-app = Flask(__name__)
+import video_request
 
 if __name__ == "__main__":
     states.initial()
@@ -27,5 +26,9 @@ if __name__ == "__main__":
     app.add_url_rule('/add_and_skip', view_func=songs.add_and_skip)
     app.add_url_rule('/beauty', view_func=beauty.get_beauty)
     app.add_url_rule('/boobs', view_func=beauty.get_boobs)
+    app.add_url_rule('/video_request', view_func=video_request.video_request_page)
+    app.add_url_rule('/vrapi', view_func=video_request.video_request)
 
-    app.run(host='0.0.0.0', port=7001)
+    # app.run(host='0.0.0.0', port=7001)
+    socketio.run(app, host='0.0.0.0', port=7001)
+

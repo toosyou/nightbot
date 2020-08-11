@@ -19,6 +19,7 @@ numpy = "*"
 better-exceptions = "*"
 lxml = "*"
 gtts = "*"
+flask-socketio = "*"
 
 [requires]
 python_version = "3.6"

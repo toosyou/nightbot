@@ -27,7 +27,7 @@ class BeautyLinks():
         new_articles = get_recent_articles(self.title_rule, self.n_articles)
         self.urls = filter_by_upvotes(new_articles, self.upvote_threshold)
 
-boobs_links = BeautyLinks(r'.*[兇|凶|胸|奶|\b脾氣\b].*', 10, 10)
+boobs_links = BeautyLinks(r'.*(兇|凶|胸|奶|脾氣).*', 30, 5)
 beauty_links = BeautyLinks('.*', 50, 10)
 
 def get_webPage(url):
@@ -104,17 +104,19 @@ def filter_by_upvotes(allArticles, threshold=10):
         if int(article['pushCount']) > threshold:
             url = PTT_url+article['href']
             newRequest = get_webPage(url)
-            soup = BeautifulSoup(newRequest,'lxml')
 
-            # 找尋符合的 img 圖片網址
-            imgLinks = soup.findAll('a',{'href':re.compile('https:\/\/(imgur|i\.imgur)\.com\/.*.jpg$')})
-            
-            if len(imgLinks)>0:
-                try:
-                    for imgLink in imgLinks:
-                        images.append(imgLink['href'])
-                except Exception as e:
-                    pass
+            if newRequest is not None:
+                soup = BeautifulSoup(newRequest,'lxml')
+
+                # 找尋符合的 img 圖片網址
+                imgLinks = soup.findAll('a',{'href':re.compile('https:\/\/(imgur|i\.imgur)\.com\/.*.jpg$')})
+                
+                if len(imgLinks)>0:
+                    try:
+                        for imgLink in imgLinks:
+                            images.append(imgLink['href'])
+                    except Exception as e:
+                        pass
     return images
 
 def get_beauty():

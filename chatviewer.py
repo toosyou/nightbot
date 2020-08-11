@@ -12,6 +12,7 @@ import strike
 import lyric
 import states
 import beauty
+import video_request
 
 CONFIG_FILENAME = './paylin.cfg'
 secret_config = configparser.ConfigParser()
@@ -58,6 +59,7 @@ def redemption(title, user_id, user_input):
         '隨機表特': lambda user_id, user_input: '@{} 恭喜獲得{}'.format(user_id, beauty.get_beauty()),
         '隨機奶特': lambda user_id, user_input: '小色鬼 @{} 恭喜獲得{}'.format(user_id, beauty.get_boobs()),
         '全服廣播': lambda user_id, user_input: '!speak {} 說 {}'.format(user_id, user_input),
+        '播放 youtube 影片': lambda user_id, user_input: video_request.push_queue(user_id, user_input)
     }
 
     if title in title_and_funcs:
