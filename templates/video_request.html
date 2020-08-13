@@ -10,10 +10,6 @@
            var socket = io.connect('http://' + document.domain + ':' + location.port);
            var playing = false;
 
-           //socket.on('connect', function() {
-           //    socket.emit('am up', {data: 'I\'m connected!'});
-           //});
-
            //listens to 'price update' message on socket
            socket.on('new video', function(msg) {
                 // $('#video').src = msg + '?start=10&rel=0&autoplay=1'
@@ -22,8 +18,7 @@
                 }
                 
                 playing = true;
-                document.getElementById('video').src = `${msg.url}?start=${msg.start_time}&rel=0&autoplay=1`;
-
+                document.getElementById('video').src = `${msg.url}?start=${msg.start_time}&rel=0&autoplay=1&showinfo=0&controls=0`;
                 socket.emit('successful')
 
                 setTimeout(function(){
@@ -52,10 +47,10 @@
    </style>
 </head>
 <body>
-    <iframe id='video' width="560" height="315" 
+    <iframe id='video' width="100%" height="400px" 
     src=""
     frameborder="0" 
-    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
+    allow="autoplay;" 
     allowfullscreen></iframe>
 </body>
 </html>

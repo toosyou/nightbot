@@ -1,3 +1,4 @@
+from flask import render_template
 from twitchio.ext import commands
 import configparser
 import re
@@ -13,6 +14,7 @@ import lyric
 import states
 import beauty
 import video_request
+from app_socket import socketio
 
 CONFIG_FILENAME = './paylin.cfg'
 secret_config = configparser.ConfigParser()
@@ -28,6 +30,14 @@ def request_channel_id():
     }
     r = requests.get('https://api.twitch.tv/helix/users', params=params, headers=headers)
     return r.json()['data'][0]['id']
+
+def comment_screen():
+    return render_template('comment_screen.html')
+
+def send_comment(comment, user_id):
+    socketio.emit('new comment', {
+        'comment': '{}: {}'.format(user_id, comment)
+    })
 
 def check_vote(comment, user_id):
     if comment in states.global_states.anchor_option:
@@ -94,17 +104,18 @@ class Bot(commands.Bot):
             redemption(title, user_id, user_input)
 
     async def event_message(self, ctx):
-        # make sure the bot ignores itself and the streamer
-        if ctx.author.name.lower() == 'Nightbot'.lower():
-            return
-
         comment = ctx.content
         user_id = ctx.author.name
+
+        # make sure the bot ignores itself and the streamer
+        if user_id.lower() == 'Nightbot'.lower():
+            return
 
         check_vote(comment.lower().strip(), user_id)
         lyric_match(comment)
         check_strike(comment, user_id)
         check_command(comment, user_id)
+        send_comment(comment, user_id)
 
 chatviewer = Bot(
     irc_token = secret_config['twitch']['chat_token'],

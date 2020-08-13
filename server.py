@@ -15,6 +15,9 @@ import video_request
 if __name__ == "__main__":
     states.initial()
 
+    app.config['TEMPLATES_AUTO_RELOAD'] = True      
+    app.jinja_env.auto_reload = True
+
     app.add_url_rule('/rank', view_func=rank_parser.parser)
     app.add_url_rule('/poll', view_func=polls.add_poll)
 
@@ -28,6 +31,7 @@ if __name__ == "__main__":
     app.add_url_rule('/boobs', view_func=beauty.get_boobs)
     app.add_url_rule('/video_request', view_func=video_request.video_request_page)
     app.add_url_rule('/vrapi', view_func=video_request.video_request)
+    app.add_url_rule('/comment_screen', view_func=chatviewer.comment_screen)
 
     # app.run(host='0.0.0.0', port=7001)
     socketio.run(app, host='0.0.0.0', port=7001)
