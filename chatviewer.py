@@ -73,7 +73,7 @@ def redemption(title, user_id, user_input):
     }
 
     if title in title_and_funcs:
-        message = title_and_funcs[title](user_id, user_input)
+        message = title_and_funcs[title](user_id, user_input)[:380]
         while True:
             if nightbot.send_channel_message(message) is None:
                 time.sleep(1 + np.random.rand()*2)

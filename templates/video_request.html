@@ -10,9 +10,7 @@
            var socket = io.connect('http://' + document.domain + ':' + location.port);
            var playing = false;
 
-           //listens to 'price update' message on socket
            socket.on('new video', function(msg) {
-                // $('#video').src = msg + '?start=10&rel=0&autoplay=1'
                 if(playing){
                     return;
                 }
@@ -33,7 +31,6 @@
        $(function(){
             $('#video').css({ width: $(window).innerWidth() + 'px', height: $(window).innerHeight() + 'px' });
 
-            // If you want to keep full screen on window resize
             $(window).resize(function(){
                 $('#video').css({ width: $(window).innerWidth() + 'px', height: $(window).innerHeight() + 'px' });
             });
