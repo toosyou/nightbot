@@ -12,10 +12,10 @@ secret_config.read(CONFIG_FILENAME)
 def request_nightbot_token():
     r = requests.post('https://api.nightbot.tv/oauth2/token',
         data={
-            'client_id': secret_config['secret']['client_id'],
-            'grant_type': secret_config['secret']['grant_type'],
-            'scope': secret_config['secret']['scope'],
-            'client_secret': secret_config['secret']['client_secret'],
+            'client_id': secret_config['nightbot']['client_id'],
+            'grant_type': secret_config['nightbot']['grant_type'],
+            'scope': secret_config['nightbot']['scope'],
+            'client_secret': secret_config['nightbot']['client_secret'],
         }
     )
     return r.json()['access_token']

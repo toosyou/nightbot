@@ -1,3 +1,4 @@
 config.cfg
 *.ipynb
 settings.json
+__pycache__
