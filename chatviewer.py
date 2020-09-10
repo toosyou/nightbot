@@ -16,7 +16,7 @@ import beauty
 import video_request
 from app_socket import socketio
 
-CONFIG_FILENAME = './paylin.cfg'
+CONFIG_FILENAME = './config.cfg'
 secret_config = configparser.ConfigParser()
 secret_config.read(CONFIG_FILENAME)
 

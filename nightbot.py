@@ -5,7 +5,7 @@ import os, sys
 sys.path.append(os.path.join('./', 'NightPy'))
 from NightPy.nightpy import NightPy
 
-CONFIG_FILENAME = './paylin.cfg'
+CONFIG_FILENAME = './config.cfg'
 secret_config = configparser.ConfigParser()
 secret_config.read(CONFIG_FILENAME)
 
