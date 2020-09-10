@@ -39,6 +39,11 @@ def send_comment(comment, user_id):
         'comment': '{}: {}'.format(user_id, comment)
     })
 
+def fake_comments(user_id, comment):
+    for _ in range(100):
+        send_comment(comment, user_id)
+    return '彈幕刷起來'
+
 def check_vote(comment, user_id):
     if comment in states.global_states.anchor_option:
         states.global_states.vote(user_id, comment)
@@ -69,7 +74,8 @@ def redemption(title, user_id, user_input):
         '隨機表特': lambda user_id, user_input: '@{} 恭喜獲得{}'.format(user_id, beauty.get_beauty()),
         '隨機奶特': lambda user_id, user_input: '小色鬼 @{} 恭喜獲得{}'.format(user_id, beauty.get_boobs()),
         '全服廣播': lambda user_id, user_input: '!speak {} 說 {}'.format(user_id, user_input),
-        '播放 youtube 影片': lambda user_id, user_input: video_request.push_queue(user_id, user_input)
+        '播放 youtube 影片': lambda user_id, user_input: video_request.push_queue(user_id, user_input),
+        '彈幕刷起來': lambda user_id, user_input: fake_comments(user_id, user_input)
     }
 
     if title in title_and_funcs:
@@ -82,7 +88,7 @@ def redemption(title, user_id, user_input):
 
 class Bot(commands.Bot):
     async def event_ready(self):
-        await self.pubsub_subscribe(secret_config['twitch']['oauth_token'], 
+        await self.pubsub_subscribe(secret_config['twitch']['oauth_token'],
                 'channel-points-channel-v1.{}'.format(request_channel_id()))
 
     async def event_raw_pubsub(self,  data):
