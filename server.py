@@ -1,4 +1,3 @@
-
 import better_exceptions; better_exceptions.hook()
 
 from app_socket import app, socketio
