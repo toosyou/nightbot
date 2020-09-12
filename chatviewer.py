@@ -7,6 +7,7 @@ import time
 import requests
 import threading
 import numpy as np
+import requests
 
 from nightbot import nightbot
 import strike
@@ -86,6 +87,47 @@ def redemption(title, user_id, user_input):
             else:
                 return
 
+avaliable_controls = [s.strip() for s in secret_config['game_control']['controls'].split(',')] if secret_config.has_section('game_control') else None
+poll_controls = [s.strip() for s in secret_config['game_control']['poll_controls'].split(',')] if secret_config.has_section('game_control') else None
+def game_control_poll_result(control):
+    votes = states.global_states.polls[control].options
+    agree = sum([votes[s] for s in ['yes', 'y', 'Yes', 'Y']])
+    disagree = sum([votes[s] for s in ['no', 'n', 'No', 'N']])
+
+    if agree > disagree: # succeed, send control
+        r = requests.get(secret_config['game_control']['base_url'], params={'control': control})
+
+    nightbot.send_channel_message('{} result: agree : disagree = {} : {}, {} {}!'.format(
+        control, agree, disagree, control,
+        'sent' if agree > disagree else 'not sent'
+    ))
+
+    states.global_states.del_poll(control)
+
+def game_control(comment, user_id):
+    global avaliable_controls
+    global poll_controls
+
+    def no_other_poll_controls():
+        for control in poll_controls:
+            if control in states.global_states.polls:
+                return False
+        return True
+
+    if secret_config.has_section('game_control'):
+        control = comment.lower().strip()
+
+        if control in avaliable_controls:
+            r = requests.get(secret_config['game_control']['base_url'], params={'control': control})
+
+        elif control in poll_controls:
+            if no_other_poll_controls():
+                states.global_states.add_poll(control, ['yes', 'y', 'Yes', 'Y', 'no', 'n', 'No', 'N'])
+                threading.Timer(11, game_control_poll_result, [control]).start()
+                nightbot.send_channel_message('{} poll initiated! Type (y)es/(n)o to agree/disagree! 10s remaining.'.format(control))
+            else:
+                nightbot.send_channel_message('Another poll has been initiated. Wait 10s for another one.')
+
 class Bot(commands.Bot):
     async def event_ready(self):
         await self.pubsub_subscribe(secret_config['twitch']['oauth_token'],
@@ -117,6 +159,7 @@ class Bot(commands.Bot):
         if user_id.lower() == 'Nightbot'.lower():
             return
 
+        game_control(comment, user_id)
         check_vote(comment.lower().strip(), user_id)
         lyric_match(comment)
         check_strike(comment, user_id)

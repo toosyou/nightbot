@@ -20,9 +20,6 @@ better-exceptions = "*"
 lxml = "*"
 gtts = "*"
 flask-socketio = "*"
-aiohttp = "*"
-async-timeout = "*"
-websockets = "*"
 
 [requires]
 python_version = "3.8"
