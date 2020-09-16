@@ -97,7 +97,7 @@ def game_control_poll_result(control):
     if agree > disagree: # succeed, send control
         r = requests.get(secret_config['game_control']['base_url'], params={'control': control})
 
-    nightbot.send_channel_message('{} result: agree : disagree = {} : {}, {} {}!'.format(
+    nightbot.send_channel_message('{} result -> agree : disagree = {} : {}, {} {}!'.format(
         control, agree, disagree, control,
         'sent' if agree > disagree else 'not sent'
     ))
@@ -117,8 +117,19 @@ def game_control(comment, user_id):
     if secret_config.has_section('game_control'):
         control = comment.lower().strip()
 
-        if control in avaliable_controls:
-            r = requests.get(secret_config['game_control']['base_url'], params={'control': control})
+        if control.split(' ')[0] in avaliable_controls and len(control.split(' ')) < 3:
+            try:
+                if len(control.split(' ')) == 2:
+                    repeat = int(control.split(' ')[1])
+                repeat = min(max(1, repeat), 5)
+            except:
+                repeat = 1
+
+            r = requests.get(secret_config['game_control']['base_url'], 
+                                params={
+                                    'control': control.split(' ')[0],
+                                    'repeat': repeat
+                                })
 
         elif control in poll_controls:
             if no_other_poll_controls():
